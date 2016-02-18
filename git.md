@@ -192,7 +192,235 @@ git checkout其实是用版本库里的版本替换工作区的版本，无论�
 
 当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。  
 
-准备工作已经做好了，那么如何 让本地的文件同步到github上去呢？ 接下来小编告诉你。
+准备工作已经做好了，那么如何 让本地的文件同步到github上去呢？ 接下来小编告诉你。  
+
+首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库：  
+在Repository name填入learngit，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：  
+现在，我们根据GitHub的提示，在本地的learngit仓库下运行命令：  
+` $ git remote add origin git@github.com:michaelliao/learngit.git `
+注意：把上面的michaelliao替换成你自己的GitHub账户名  
+
+添加后，远程库的名字就是origin，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库。  
+下一步，就可以把本地库的所有内容推送到远程库上：  
+```
+$ git push -u origin master  
+Counting objects: 19, done.  
+Delta compression using up to 4 threads.  
+Compressing objects: 100% (19/19), done.  
+Writing objects: 100% (19/19), 13.73 KiB, done.  
+Total 23 (delta 6), reused 0 (delta 0)  
+To git@github.com:michaelliao/learngit.git  
+ * [new branch]      master -> master  
+Branch master set up to track remote branch master from origin.  
+
+```  
+把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。  
+
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。  
+
+推送成功后，可以立刻在GitHub页面中看到远程库的内容已经和本地一模一样  
+
+从现在起，只要本地作了提交，就可以通过命令：  
+
+` $ git push origin master `  
+
+SSH警告  
+
+当你第一次使用Git的clone或者push命令连接GitHub时，会得到一个警告：  
+
+The authenticity of host 'github.com (xx.xx.xx.xx)' can't be established.  
+RSA key fingerprint is xx.xx.xx.xx.xx.  
+Are you sure you want to continue connecting (yes/no)?  
+
+这是因为Git使用SSH连接，而SSH连接在第一次验证GitHub服务器的Key时，需要你确认GitHub的Key的指纹信息是否真的来自GitHub的服务器，输入yes回车即可。  
+
+Git会输出一个警告，告诉你已经把GitHub的Key添加到本机的一个信任列表里了：  
+
+Warning: Permanently added 'github.com' (RSA) to the list of known hosts.  
+
+这个警告只会出现一次，后面的操作就不会有任何警告了。  
+
+如果你实在担心有人冒充GitHub服务器，输入yes前可以对照GitHub的RSA Key的指纹信息是否与SSH连接给出的一致。  
+
+如何让github的文件克隆到本地的工作区域中：  
+```
+$ git clone git@github.com:michaelliao/gitskills.git  
+Cloning into 'gitskills'...  
+remote: Counting objects: 3, done.  
+remote: Total 3 (delta 0), reused 0 (delta 0)  
+Receiving objects: 100% (3/3), done.  
+
+$ cd gitskills  
+$ ls  
+README.md  
+
+```  
+在版本回退里，你已经知道，每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格来说不是指向提交，而是指向master，master才是指向提交的，所以，HEAD指向的就是当前分支。  
+那么开始创建一个分支  
+
+首先，我们创建dev分支，然后切换到dev分支：  
+```
+$ git checkout -b dev   
+Switched to a new branch 'dev'  
+
+```  
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：  
+
+```
+$ git branch dev  
+$ git checkout dev  
+Switched to branch 'dev'  
+
+```
+
+然后，用git branch命令查看当前分支：  
+
+```
+$ git branch  
+* dev  
+  master  
+```  
+git branch命令会列出所有分支，当前分支前面会标一个*号。  
+
+然后，我们就可以在dev分支上正常提交，比如对readme.txt做个修改，加上一行：  
+
+然后提交：  
+```
+$ git add readme.txt   
+$ git commit -m "branch test"  
+[dev fec145a] branch test  
+ 1 file changed, 1 insertion(+)  
+ 
+ ```
+
+现在，dev分支的工作完成，我们就可以切换回master分支：  
+
+```
+$ git checkout master  
+Switched to branch 'master'  
+
+```  
+
+切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变：  
+
+现在，我们把dev分支的工作成果合并到master分支上：  
+```
+$ git merge dev  
+Updating d17efd8..fec145a  
+Fast-forward  
+ readme.txt |    1 +  
+ 1 file changed, 1 insertion(+)  
+```  
+git merge命令用于合并指定分支到当前分支。合并后，再查看readme.txt的内容，就可以看到，和dev分支的最新提交是完全一样的。  
+
+注意到上面的Fast-forward信息，Git告诉我们，这次合并是“快进模式”，也就是直接把master指向dev的当前提交，所以合并速度非常快。  
+
+当然，也不是每次合并都能Fast-forward，我们后面会讲其他方式的合并。  
+
+合并完成后，就可以放心地删除dev分支了：  
+```
+$ git branch -d dev  
+Deleted branch dev (was fec145a).  
+```
+删除后，查看branch，就只剩下master分支了：  
+
+$ git branch  
+* master  
+
+因为创建、合并和删除分支非常快，所以Git鼓励你使用分支完成某个任务，合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。  
+
+ Git鼓励大量使用分支：  
+
+查看分支：git branch  
+
+创建分支：git branch <name>  
+
+切换分支：git checkout <name>  
+
+创建+切换分支：git checkout -b <name>  
+
+合并某分支到当前分支：git merge <name>  
+
+删除分支：git branch -d <name>  
+
+有分支就会有冲突  
+如果您把分支上的文件修改后，提交到版本库中，切换到主干上，然后修改文件后 也提交，然后合并分支和master上面的 内容，就会发生 冲突我们可以直接查看readme.txt的内容：  
+```
+Git is a distributed version control system.  
+Git is free software distributed under the GPL.  
+Git has a mutable index called stage.  
+Git tracks changes of files.  
+<<<<<<< HEAD  
+Creating a new branch is quick & simple.  
+=======  
+Creating a new branch is quick AND simple.  
+>>>>>>> feature1  
+```  
+Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改如下后保存：  
+
+Creating a new branch is quick and simple.  
+
+再提交：  
+```
+$ git add readme.txt   
+$ git commit -m "conflict fixed"  
+[master 59bc1cb] conflict fixed   
+
+```
+
+冲突解决了，可以安心 编写程序了  
+
+还可以用带参数的git log也可以看到分支的合并情况：  
+```
+$ git log --graph --pretty=oneline --abbrev-commit  
+*   59bc1cb conflict fixed  
+|\  
+| * 75a857c AND simple  
+* | 400b400 & simple  
+|/  
+* fec145a branch test  
+...  
+
+最后，删除feature1分支：  
+
+$ git branch -d feature1  
+Deleted branch feature1 (was 75a857c).  
+```  
+注意：通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。  
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。  
+准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：  
+```
+$ git merge --no-ff -m "merge with no-ff" dev
+Merge made by the 'recursive' strategy.
+ readme.txt |    1 +
+ 1 file changed, 1 insertion(+)
+ ```
+ 
+
+因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。  
+
+合并后，我们用git log看看分支历史：  
+```
+$ git log --graph --pretty=oneline --abbrev-commit  
+*   7825a50 merge with no-ff  
+|\  
+| * 6224937 add merge  
+|/  
+*   59bc1cb conflict fixed  
+...  
+```  
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
