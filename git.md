@@ -179,6 +179,8 @@ git checkout其实是用版本库里的版本替换工作区的版本，无论�
 完全可以自己搭建一台运行Git的服务器，不过现阶段，为了学Git先搭个服务器绝对是小题大作。好在这个世界上有个叫GitHub的神奇的网站，从名字就可以看出，这个网站就是提供Git仓库托管服务的，所以，只要注册一个GitHub账号，就可以免费获得Git远程仓库。  
 在继续阅读后续内容前，请自行注册GitHub账号。由于你的本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：  
 
+####远程仓库连接  
+
 第1步：创建SSH Key。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：  
 
 `$ ssh-keygen -t rsa -C "youremail@example.com"`  
@@ -225,6 +227,13 @@ Branch master set up to track remote branch master from origin.
 从现在起，只要本地作了提交，就可以通过命令：  
 
 ` $ git push origin master `  
+
+```
+
+去除本地仓库与远程仓库的关联: $ git remote rm origin(远程仓库)  
+克隆了别人的远程仓库到自己本地工作区，但是想把这种关联到自己的远层仓库:$ git remote set-url origin git@your-new-url  
+
+```
 
 SSH警告  
 
